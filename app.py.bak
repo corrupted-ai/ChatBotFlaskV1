@@ -1,0 +1,23 @@
+from flask import Flask, render_template, request, jsonify
+import requests
+
+app = Flask(__name__)
+
+DATABRICKS_ENDPOINT = "https://dummy.databricks.api/endpoint"
+
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/chat", methods=["POST"])
+def chat():
+    user_input = request.json.get("message")
+    # Dummy call to simulate Databricks endpoint
+    # Replace this with actual call logic
+    response = {
+        "reply": f"Echo: {user_input}"
+    }
+    return jsonify(response)
+
+if __name__ == "__main__":
+    app.run(debug=True)

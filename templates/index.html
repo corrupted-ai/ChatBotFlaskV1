@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-dark text-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-secondary px-3">
+    <a class="navbar-brand" href="#">
+      <img src="https://via.placeholder.com/100x40?text=Logo" height="30" alt="Company Logo">
+    </a>
+    <span class="navbar-text">
+      <img src="https://via.placeholder.com/30x30?text=👤" class="rounded-circle" alt="User Icon">
+    </span>
+  </nav>
+
+  <div class="container py-4">
+    <h2 class="text-center mb-3">Chatbot Assistant</h2>
+
+    <!-- Example Prompts -->
+    <div class="mb-4">
+      <p>Try asking:</p>
+      <div id="examples" class="d-flex flex-wrap gap-2">
+        {% for prompt in examples %}
+        <button class="btn btn-outline-light btn-sm" onclick="sendMessageFromExample('{{ prompt }}')">{{ prompt }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="card bg-secondary">
+      <div class="card-body">
+        <div id="chatbox" class="mb-3" style="height: 300px; overflow-y: scroll;"></div>
+        <div class="input-group">
+          <input type="text" id="userInput" class="form-control" placeholder="Type your question...">
+          <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function sendMessage(message = null) {
+      const input = document.getElementById('userInput');
+      const chatbox = document.getElementById('chatbox');
+      const userMessage = message || input.value;
+      if (!userMessage.trim()) return;
+
+      chatbox.innerHTML += `<div><strong>You:</strong> ${userMessage}</div>`;
+      input.value = "";
+
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: userMessage})
+      });
+
+      const data = await res.json();
+      chatbox.innerHTML += `<div><strong>Bot:</strong> ${data.reply}</div>`;
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function sendMessageFromExample(text) {
+      document.getElementById('userInput').value = text;
+      sendMessage(text);
+    }
+  </script>
+</body>
+</html>
