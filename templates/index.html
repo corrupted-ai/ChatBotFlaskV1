@@ -13,17 +13,14 @@
 <body style="background: linear-gradient(135deg, #232526 0%, #414345 100%); min-height: 100vh;" class="text-light">
 
   <!-- Navbar -->
-  <nav class="navbar navbar-dark bg-secondary px-3 shadow-sm rounded-bottom">
+  <nav class="navbar navbar-dark bg-black justify-content-center shadow-sm rounded-bottom" style="padding: 0;">
     <a class="navbar-brand" href="#">
-      <img src="https://via.placeholder.com/100x40?text=Logo" height="30" alt="Company Logo">
+      <img src="{{ url_for('static', filename='images/CompanyLogo.png') }}" height="70" alt="Company Logo">
     </a>
-    <span class="navbar-text">
-      <img src="https://via.placeholder.com/30x30?text=👤" class="rounded-circle border border-light" alt="User Icon">
-    </span>
   </nav>
 
   <div class="container py-4">
-    <h2 class="text-center mb-3 fw-bold">Chatbot Assistant</h2>
+    <h2 class="text-center mb-3 fw-bold">Store Assistant</h2>
 
     <!-- Example Prompts -->
     <div class="mb-4">
@@ -41,14 +38,6 @@
       <div class="card-body">
         <div id="chatbox" class="mb-3 px-2 py-2"
           style="height: 300px; overflow-y: auto; background: #23272b; border-radius: 1rem;"></div>
-
-        <!-- <div class="input-group">
-          <textarea id="userInput" class="form-control rounded-start-pill" placeholder="Type your question..."
-            rows="1"></textarea>
-          <button id="sendBtn" class="btn btn-primary rounded-end-pill px-4" onclick="sendMessage()">
-            Send <i class="bi bi-send"></i>
-          </button>
-        </div> -->
         <div class="chat-input-wrapper mt-2">
           <textarea id="userInput" class="form-control chat-input" placeholder="Type your question..."
             rows="1"></textarea>
@@ -78,7 +67,7 @@
 
       // Reset textarea height to original
       input.style.height = '44px';
-      
+
       // Show loading indicator
       loadingIndicator = document.createElement('div');
       loadingIndicator.className = 'message-container bot';
