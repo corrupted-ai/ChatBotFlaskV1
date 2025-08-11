@@ -8,6 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
@@ -53,9 +54,23 @@
     <div class="chat-input-wrapper mt-2">
       <textarea id="userInput" class="chat-input" placeholder="Type your question..." rows="1"></textarea>
       <div class="d-flex justify-content-between align-items-center mt-2">
-        <button id="resetChat" class="btn btn-outline-danger btn-sm px-2 py-1" type="button" style="height:36px;">
-          <i class="bi bi-arrow-counterclockwise"></i>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+          <button id="resetChat" class="btn btn-outline-danger btn-sm px-2 py-1" type="button" style="height:36px;">
+            <i class="bi bi-arrow-counterclockwise"></i>
+          </button>
+
+          <!-- Model Selection Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle px-2 py-1" type="button" id="modelDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false" style="height:36px;">
+              <i class="bi bi-cpu me-1"></i><span id="selectedModel">GPT-4o</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="modelDropdown">
+              <li><a class="dropdown-item" href="#" data-model="gpt4o">GPT-4o</a></li>
+              <li><a class="dropdown-item" href="#" data-model="claude">Claude Opus</a></li>
+            </ul>
+          </div>
+        </div>
         <button id="sendIcon" class="btn btn-info btn-sm ms-2 px-3 py-1" onclick="sendMessage()" type="button" disabled>
           <i class="bi bi-send"></i>
         </button>
@@ -67,6 +82,18 @@
     let loadingIndicator = null;
     let messageIdCounter = 0;
     let fetchController = null; // For aborting fetch
+
+    // Model selection functionality
+    let selectedModel = 'gpt4o'; // Default model
+
+    // Handle dropdown selection
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', function (e) {
+        e.preventDefault();
+        selectedModel = this.getAttribute('data-model');
+        document.getElementById('selectedModel').textContent = this.textContent;
+      });
+    });
 
     async function sendMessage(message = null) {
       const input = document.getElementById('userInput');
@@ -97,12 +124,18 @@
       fetchController = new AbortController();
 
       const ContUserMsg = getChatHistoryForModel();
+
+
+
       console.log('Sending message:', ContUserMsg);
       try {
         const res = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: ContUserMsg }),
+          body: JSON.stringify({
+            message: ContUserMsg,
+            model: selectedModel
+          }),
           signal: fetchController.signal
         });
 
@@ -115,8 +148,8 @@
           chatbox.removeChild(loadingIndicator);
           loadingIndicator = null;
         }
-
-        appendMessage('Bot', data[0], 'bot');
+        const content = data?.choices?.[0]?.message?.content || 'No response received';
+        appendMessage('Bot', content, 'bot');
       } catch (err) {
         if (err.name === 'AbortError') {
           // User stopped the message
@@ -182,8 +215,8 @@
         regenBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i>';
         regenBtn.onclick = () => regenerateResponse(msgId);
 
-        actions.appendChild(thumbsUp);
-        actions.appendChild(thumbsDown);
+        // actions.appendChild(thumbsUp);
+        // actions.appendChild(thumbsDown);
         actions.appendChild(regenBtn);
 
         wrapper.appendChild(actions);
@@ -220,14 +253,20 @@
 
       // Fetch new response (simulate with timeout here, replace with your fetch)
       const lastUserMsg = getChatHistoryForModel();
+
+
       fetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: lastUserMsg })
+        body: JSON.stringify({
+          message: lastUserMsg,
+          model: selectedModel
+        })
       })
         .then(res => res.json())
         .then(data => {
-          bubble.innerHTML = marked.parse(data[0]);
+          const content = data?.choices?.[0]?.message?.content || 'No response received';
+          bubble.innerHTML = marked.parse(content);
           console.log('Response:', data);
         });
     }
